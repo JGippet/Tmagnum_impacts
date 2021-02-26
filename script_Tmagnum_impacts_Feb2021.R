@@ -8,6 +8,7 @@ library(ggeffects)
 library(emmeans)
 library(multcomp)
 library(vioplot)
+library(vegan)
 
 
 library(lme4)
@@ -18,7 +19,7 @@ library(bbmle) #for AICtab
 library(cowplot)
 library(RColorBrewer)
 library(ggpubr)
-library(vegan)
+
 library(lmerTest)
 
 
@@ -280,7 +281,7 @@ mean(dataTI3_Temperature$Tground_mean[dataTI3_Temperature$Bface=="W"])
                                 ######### [PART 5] #########
                       ## Effect of T. magnum on native ant communities ##
 
-# Does Tapinoma influence the abundance, richness and diversity of the native species?
+# Does Tapinoma influence the abundance, richness and diversity of native ant species?
 dataTI3presence <- dataTI3
 for (i in 1:1920) {for (j in 17:31) {if(dataTI3presence[i,j] > 0){dataTI3presence[i,j] <- 1}}} 
 head(dataTI3presence)
@@ -296,16 +297,70 @@ dataTI3presence_v2 <- aggregate(dataTI3presence[,17:31],
 colnames(dataTI3presence_v2)[1:5] <- c("zone", "building", "time", "Date", "age_building")
 head(dataTI3presence_v2)
 dim(dataTI3presence_v2)  # 48 18
+dataTI3presence_v2 <- dataTI3presence_v2[order(dataTI3presence_v2$zone, dataTI3presence_v2$building, dataTI3presence_v2$time),]
 
 dataTI3presence_v2$nbBaits <- 40
 dataTI3presence_v2$allNative <-  rowSums(dataTI3presence_v2[,7:20])
 dataTI3presence_v2$allANTS <-  rowSums(dataTI3presence_v2[,6:20])
 
-allANTS_test <- glmmTMB(cbind(allANTS, nbBaits) ~ zone + (1|building) + (1|Date) + (1|age_building), data=dataTI3presence_v2, family=binomial)
+
+
+# Species richness by sampling event
+dataTI3presence_v2$richness <- NA
+for (i in 1:dim(dataTI3presence_v2)[1]){
+  dataTI3presence_v2$richness[i] = 14 - length(which(dataTI3presence_v2[i,7:20]==0))
+}
+hist(dataTI3presence_v2$richness)
+
+# Shannon diversity by sampling event
+dataTI3presence_v2$diversity <- diversity(dataTI3presence_v2[,7:20], index = "shannon")
+hist(dataTI3presence_v2$diversity)
+
+vioplot(richness ~ zone, data= dataTI3presence_v2, ylim=c(0,10))
+vioplot(diversity ~ zone, data= dataTI3presence_v2, ylim=c(0,2))
+vioplot(allNative ~ zone, data= dataTI3presence_v2, ylim=c(0,40))
+
+# native ants richness
+richness_test <- glmmTMB(richness ~ 1 +
+                           zone + 
+                           (1|building) + 
+                           (1|Date) + 
+                           (1|age_building), 
+                         data=dataTI3presence_v2, 
+                         family=poisson)
+summary(richness_test)
+
+# native ants diversity
+diversity_test <- glmmTMB(diversity ~ 1 +
+                           zone + 
+                           (1|building) + 
+                           (1|Date) + 
+                           (1|age_building), 
+                         data=dataTI3presence_v2, 
+                         family=gaussian)
+summary(diversity_test)
+
+# native ants abundance
+allNative_test <- glmmTMB(cbind(allNative, nbBaits) ~ 1 +
+                            zone + 
+                            (1|building) + 
+                            (1|Date) + 
+                            (1|age_building), 
+                          data=dataTI3presence_v2, 
+                          family=binomial)
+summary(allNative_test)
+
+
+allANTS_test <- glmmTMB(cbind(allANTS, nbBaits) ~ 1 +
+                          zone + 
+                          (1|building) + 
+                          (1|Date) + 
+                          (1|age_building), 
+                        data=dataTI3presence_v2, 
+                        family=binomial)
 summary(allANTS_test)
 
-allNative_test <- glmmTMB(cbind(allNative, nbBaits) ~ zone + (1|building) + (1|Date) + (1|age_building), data=dataTI3presence_v2, family=binomial)
-summary(allNative_test)
+
 
 lasnig_test <- glmmTMB(cbind(las_nig, nbBaits) ~ zone + (1|building) + (1|Date) + (1|age_building), data=dataTI3presence_v2, family=binomial)
 summary(lasnig_test)
