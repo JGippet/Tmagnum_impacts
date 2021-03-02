@@ -662,12 +662,50 @@ plot(sr_binomial_tetsp) # very good...
 
 
 
+## Number of workers recruited at baits
 
+# Lasius niger
+poisson_lasnig <- glmmTMB(las_nig ~ 1 + 
+                       zone +
+                       time + 
+                       Bface +
+                       zone:time +
+                       zone:Bface +
+                       time:Bface +
+                       (1|building)  + 
+                         (1|Date),
+                     
+                     ziformula= ~ 1 +
+                       zone +
+                       time +
+                       Bface +
+                       #zone:time +
+                       zone:Bface +
+                       time:Bface +
+                       (1|building) + 
+                       (1|Date),
+                     
+                     family=truncated_nbinom1, 
+                     data=dataTI3)
 
+Anova(poisson_lasnig, type="III")
+summary(poisson_lasnig)
 
+system.time(sr_poisson_lasnig <- simulateResiduals(poisson_lasnig, n=1000))
+testDispersion(simulationOutput = sr_poisson_lasnig, alternative ="two.sided")
+plot(sr_poisson_lasnig) # very good...
 
+ef_binomial_lasnig_all <- ggpredict(binomial_lasnig, c("time", "Bface", "zone"), type = "fe")
+plot(ef_binomial_lasnig_all, line.size=1.25, col=colorCardinals) 
+performance::r2(binomial_lasnig)
 
+ef_binomial_lasnig_side <- ggpredict(binomial_lasnig, c("Bface", "zone"), type = "fe")
+plot(ef_binomial_lasnig_side, line.size=1.25, col=colorInvasion ) + ylim(0.15, 0.62)
 
+marginal_lasnig_side <- emmeans(binomial_lasnig, specs =  pairwise ~ zone | Bface, type = "response", adjust="tukey") 
+cld(marginal_lasnig_side$emmeans,
+    alpha=0.05,
+    Letters=letters)
 
 
 
