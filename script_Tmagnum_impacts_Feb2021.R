@@ -10,6 +10,8 @@ library(multcomp)
 library(vioplot)
 library(vegan)
 
+library(see) # if using performance::check_model
+
 
 library(lme4)
 library(effects)
@@ -79,6 +81,8 @@ dataTI2$time = factor(dataTI2$time, levels(dataTI2$time)[c(2,3,1)])
 dataTI2$Bface <- as.factor(dataTI2$Bface)
 dataTI2$Bface = factor(dataTI2$Bface, levels(dataTI2$Bface)[c(2,1,3,4)]) 
 dataTI2$Date <- as.factor(dataTI2$Date)
+dataTI2$building <- as.factor(dataTI2$building)
+dataTI2$building = factor(dataTI2$building, levels(dataTI2$building)[c(1,9,10,11,12,13,14,15,16,2,3,4,5,6,7,8)]) 
 
 # Sampling design (number of baits by sampling events and day at which each sampling event was performed, by building)
 table(dataTI2$Date, dataTI2$time, dataTI2$building)
@@ -315,10 +319,19 @@ hist(dataTI3presence_v2$richness)
 # Shannon diversity by sampling event
 dataTI3presence_v2$diversity <- diversity(dataTI3presence_v2[,7:20], index = "shannon")
 hist(dataTI3presence_v2$diversity)
+head(dataTI3presence_v2)
 
 vioplot(richness ~ zone, data= dataTI3presence_v2, ylim=c(0,10))
 vioplot(diversity ~ zone, data= dataTI3presence_v2, ylim=c(0,2))
 vioplot(allNative ~ zone, data= dataTI3presence_v2, ylim=c(0,40))
+
+library(randomcoloR)
+library(viridis)
+dataTI3presence_v2$building
+colorBuilding <- c(rep(distinctColorPalette(8), each=3),rep(distinctColorPalette(8), each=3))
+shapeBuilding <- c(rep(c(0:7), each=3), rep(c(0:7), each=3))
+
+
 
 # native ants richness
 richness_test <- glmmTMB(richness ~ 1 +
@@ -329,6 +342,19 @@ richness_test <- glmmTMB(richness ~ 1 +
                          data=dataTI3presence_v2, 
                          family=poisson)
 summary(richness_test)
+check_model(richness_test)
+model_performance(richness_test)
+
+p_richness <- ggplot(dataTI3presence_v2, aes(y=richness, x=zone, fill=building)) + 
+  geom_boxplot(width=0.5, alpha=0.9, fill=colorInvasion) + # , position=position_nudge(0.5)
+  geom_point(position=position_jitter(width = 0.25, height = 0, seed=3), shape=shapeBuilding, size=2.5, stroke=1.5, aes(color=zone)) +
+  geom_text(position=position_jitter(width = 0.25, height = 0,seed=3), aes(label=building), size=2.5) +
+  scale_color_manual(values = colorInvasion) +
+  ylim(c(0,10)) +
+  scale_y_continuous( breaks=c(0,1,2,3,4,5,6,7,8,9,10), labels=c(0,1,2,3,4,5,6,7,8,9,10), limits=c(0,10)) +
+  theme_classic()
+p_richness
+
 
 # native ants diversity
 diversity_test <- glmmTMB(diversity ~ 1 +
@@ -340,17 +366,38 @@ diversity_test <- glmmTMB(diversity ~ 1 +
                          family=gaussian)
 summary(diversity_test)
 
-# native ants abundance
+p_diversity <- ggplot(dataTI3presence_v2, aes(y=diversity, x=zone, fill=building)) + 
+  geom_boxplot(width=0.5, alpha=0.9, fill=colorInvasion) + # , position=position_nudge(0.5)
+  geom_point(position=position_jitter(width = 0.25, height = 0, seed=3), shape=shapeBuilding, size=2.5, stroke=1.5, aes(color=zone)) +
+  geom_text(position=position_jitter(width = 0.25, height = 0,seed=3), aes(label=building), size=2.5) +
+  scale_color_manual(values = colorInvasion) +
+  ylim(c(0,10)) +
+  scale_y_continuous( breaks=c(0.5,0.75,1,1.25,1.5,1.75), labels=c(0.5,0.75,1,1.25,1.5,1.75), limits=c(0.4,1.85)) +
+  theme_classic()
+p_diversity
+
+# native ants abundance (proportion of baits occupied)
 allNative_test <- glmmTMB(cbind(allNative, nbBaits) ~ 1 +
                             zone + 
-                            (1|building) + 
+                            (1|building/age_building) + 
                             (1|Date) + 
                             (1|age_building), 
                           data=dataTI3presence_v2, 
                           family=binomial)
 summary(allNative_test)
 
+p_abundance <- ggplot(dataTI3presence_v2, aes(y=allNative, x=zone, fill=building)) + 
+  geom_boxplot(width=0.5, alpha=0.9, fill=colorInvasion) + # , position=position_nudge(0.5)
+  geom_point(position=position_jitter(width = 0.25, height = 0, seed=3), shape=shapeBuilding, size=2.5, stroke=1.5, aes(color=zone)) +
+  geom_text(position=position_jitter(width = 0.25, height = 0,seed=3), aes(label=building), size=2.5) +
+  scale_color_manual(values = colorInvasion) +
+  ylim(c(0,10)) +
+  scale_y_continuous( breaks=c(0,8,16,24,32,40), labels= round(c(0,8,16,24,32,40)/40*100), limits=c(0,44)) +
+  theme_classic()
+p_abundance
 
+
+# native + tapinoma magnum ants abundance (proportion of baits occupied)
 allANTS_test <- glmmTMB(cbind(allANTS, nbBaits) ~ 1 +
                           zone + 
                           (1|building) + 
@@ -361,17 +408,44 @@ allANTS_test <- glmmTMB(cbind(allANTS, nbBaits) ~ 1 +
 summary(allANTS_test)
 
 
-
-lasnig_test <- glmmTMB(cbind(las_nig, nbBaits) ~ zone + (1|building) + (1|Date) + (1|age_building), data=dataTI3presence_v2, family=binomial)
+# Lasius niger abundance (proportion of baits occupied)
+lasnig_test <- glmmTMB(cbind(las_nig, nbBaits) ~ 1 +
+                         zone + 
+                         (1|building) + 
+                         (1|Date) + 
+                         (1|age_building), 
+                       data=dataTI3presence_v2, 
+                       family=binomial)
 summary(lasnig_test)
 
-myrspe_test <- glmmTMB(cbind(myr_spe, nbBaits) ~ zone + (1|building) + (1|Date) + (1|age_building), data=dataTI3presence_v2, family=binomial)
+# Myrmica specioides abundance (proportion of baits occupied)
+myrspe_test <- glmmTMB(cbind(myr_spe, nbBaits) ~ 1 +
+                         zone + 
+                         (1|building) + 
+                         (1|Date) + 
+                         (1|age_building), 
+                       data=dataTI3presence_v2, 
+                       family=binomial)
 summary(myrspe_test)
 
-myrsab_test <- glmmTMB(cbind(myr_sab, nbBaits) ~ zone + (1|building) + (1|Date) + (1|age_building), data=dataTI3presence_v2, family=binomial)
+# Myrmica sabuleti abundance (proportion of baits occupied)
+myrsab_test <- glmmTMB(cbind(myr_sab, nbBaits) ~ 1 +
+                         zone + 
+                         (1|building) + 
+                         (1|Date) + 
+                         (1|age_building), 
+                       data=dataTI3presence_v2, 
+                       family=binomial)
 summary(myrsab_test)
 
-tetsp_test <- glmmTMB(cbind(tet_sp, nbBaits) ~ zone + (1|building) + (1|Date) + (1|age_building), data=dataTI3presence_v2, family=binomial)
+# Tetramorium sp. abundance (proportion of baits occupied)
+tetsp_test <- glmmTMB(cbind(tet_sp, nbBaits) ~ 1 +
+                        zone + 
+                        (1|building) + 
+                        (1|Date) + 
+                        (1|age_building), 
+                      data=dataTI3presence_v2, 
+                      family=binomial)
 summary(tetsp_test)
 
 
