@@ -10,6 +10,7 @@ library(multcomp)
 library(vioplot)
 library(vegan)
 library(gridExtra)
+library(buildmer)
 
 
 library(see) # if using performance::check_model
@@ -276,14 +277,6 @@ mean(dataTI3_Temperature$Tground_mean[dataTI3_Temperature$Bface=="W"])
 
 
 
-
-
-
-
-
-
-
-
                                 ######### [PART 5] #########
                       ## Effect of T. magnum on native ant communities ##
 
@@ -469,9 +462,8 @@ summary(tetsp_test)
 
 
 
-# Species recruitment at baits
-head(dataTI3)
-dim(dataTI3)
+# Plotting native species species recruitment at baits
+
 
 # new dataset to add some info
 dataTI3_2 <- dataTI3
@@ -564,4 +556,118 @@ figure3
 dev.off()
 
 #
+
+
+
+                                       ######### [PART 6] #########
+            ## Effect of T. magnum and shading conditions on native ants' foraging activity ##
+
+## Probability of presence at baits
+
+head(dataTI3presence)
+dim(dataTI3presence)
+
+# Lasius niger
+binomial_lasnig <- glmmTMB(las_nig ~ 1 +
+                          zone + 
+                          Bface +
+                          time +
+                          zone:Bface +
+                          #zone:time +
+                          time:Bface +
+                          (1|building) +
+                          (1|Date), 
+                        data=dataTI3presence, 
+                        family=binomial)
+Anova(binomial_lasnig, type="III")
+summary(binomial_lasnig)
+
+system.time(sr_binomial_lasnig <- simulateResiduals(binomial_lasnig, n=1000))
+testDispersion(simulationOutput = sr_binomial_lasnig, alternative ="two.sided")
+plot(sr_binomial_lasnig) # very good...
+
+ef_binomial_lasnig_all <- ggpredict(binomial_lasnig, c("time", "Bface", "zone"), type = "fe")
+plot(ef_binomial_lasnig_all, line.size=1.25, col=colorCardinals) 
+performance::r2(binomial_lasnig)
+
+ef_binomial_lasnig_side <- ggpredict(binomial_lasnig, c("Bface", "zone"), type = "fe")
+plot(ef_binomial_lasnig_side, line.size=1.25, col=colorInvasion ) + ylim(0.15, 0.62)
+
+marginal_lasnig_side <- emmeans(binomial_lasnig, specs =  pairwise ~ zone | Bface, type = "response", adjust="tukey") 
+cld(marginal_lasnig_side$emmeans,
+    alpha=0.05,
+    Letters=letters)
+
+
+
+# Myrmica specioides
+binomial_myrspe <- glmmTMB(myr_spe ~ 1 +
+                             zone + 
+                             #Bface +
+                             time +
+                             #zone:Bface +
+                             #zone:time +
+                             #time:Bface +
+                             (1|building) +
+                             (1|Date), 
+                           data=dataTI3presence, 
+                           family=binomial)
+Anova(binomial_myrspe, type="III")
+summary(binomial_myrspe)
+
+system.time(sr_binomial_myrspe <- simulateResiduals(binomial_myrspe, n=1000))
+testDispersion(simulationOutput = sr_binomial_myrspe, alternative ="two.sided")
+plot(sr_binomial_myrspe) # very good...
+
+
+# Myrmica sabuleti
+binomial_myrsab <- glmmTMB(myr_sab ~ 1 +
+                             zone + 
+                             Bface +
+                             time +
+                             #zone:Bface +
+                             #zone:time +
+                             #time:Bface +
+                             (1|building) +
+                             (1|Date), 
+                           data=dataTI3presence, 
+                           family=binomial)
+Anova(binomial_myrsab, type="III")
+summary(binomial_myrsab)
+
+system.time(sr_binomial_myrsab <- simulateResiduals(binomial_myrsab, n=1000))
+testDispersion(simulationOutput = sr_binomial_myrsab, alternative ="two.sided")
+plot(sr_binomial_myrsab) # very good...
+
+
+# Tetramorium sp.
+binomial_tetsp <- glmmTMB(tet_sp ~ 1 +
+                             #zone + 
+                             Bface +
+                             #time +
+                             #zone:Bface +
+                             #zone:time +
+                             #time:Bface +
+                             (1|building) +
+                             (1|Date), 
+                           data=dataTI3presence, 
+                           family=binomial)
+Anova(binomial_tetsp, type="III")
+summary(binomial_tetsp)
+
+system.time(sr_binomial_tetsp <- simulateResiduals(binomial_tetsp, n=1000))
+testDispersion(simulationOutput = sr_binomial_tetsp, alternative ="two.sided")
+plot(sr_binomial_tetsp) # very good...
+
+
+
+
+
+
+
+
+
+
+
+
 
