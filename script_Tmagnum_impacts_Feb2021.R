@@ -9,6 +9,8 @@ library(emmeans)
 library(multcomp)
 library(vioplot)
 library(vegan)
+library(gridExtra)
+
 
 library(see) # if using performance::check_model
 
@@ -346,12 +348,12 @@ check_model(richness_test)
 model_performance(richness_test)
 
 p_richness <- ggplot(dataTI3presence_v2, aes(y=richness, x=zone, fill=building)) + 
-  geom_boxplot(width=0.5, alpha=0.9, fill=colorInvasion) + # , position=position_nudge(0.5)
-  geom_point(position=position_jitter(width = 0.25, height = 0, seed=3), shape=shapeBuilding, size=2.5, stroke=1.5, aes(color=zone)) +
+  geom_boxplot(width=0.5, alpha=0.9, fill=colorInvasion, show.legend = FALSE) +
+  geom_point(position=position_jitter(width = 0.25, height = 0, seed=3), shape=shapeBuilding, size=2.5, stroke=1.5, aes(color=zone), show.legend = FALSE) +
   geom_text(position=position_jitter(width = 0.25, height = 0,seed=3), aes(label=building), size=2.5) +
   scale_color_manual(values = colorInvasion) +
   ylim(c(0,10)) +
-  scale_y_continuous( breaks=c(0,1,2,3,4,5,6,7,8,9,10), labels=c(0,1,2,3,4,5,6,7,8,9,10), limits=c(0,10)) +
+  scale_y_continuous( breaks=c(0,1,2,3,4,5,6,7,8,9), labels=c(0,1,2,3,4,5,6,7,8,9), limits=c(0.75,9.25)) +
   theme_classic()
 p_richness
 
@@ -367,8 +369,8 @@ diversity_test <- glmmTMB(diversity ~ 1 +
 summary(diversity_test)
 
 p_diversity <- ggplot(dataTI3presence_v2, aes(y=diversity, x=zone, fill=building)) + 
-  geom_boxplot(width=0.5, alpha=0.9, fill=colorInvasion) + # , position=position_nudge(0.5)
-  geom_point(position=position_jitter(width = 0.25, height = 0, seed=3), shape=shapeBuilding, size=2.5, stroke=1.5, aes(color=zone)) +
+  geom_boxplot(width=0.5, alpha=0.9, fill=colorInvasion, show.legend = FALSE) + 
+  geom_point(position=position_jitter(width = 0.25, height = 0, seed=3), shape=shapeBuilding, size=2.5, stroke=1.5, aes(color=zone), show.legend = FALSE) +
   geom_text(position=position_jitter(width = 0.25, height = 0,seed=3), aes(label=building), size=2.5) +
   scale_color_manual(values = colorInvasion) +
   ylim(c(0,10)) +
@@ -387,14 +389,30 @@ allNative_test <- glmmTMB(cbind(allNative, nbBaits) ~ 1 +
 summary(allNative_test)
 
 p_abundance <- ggplot(dataTI3presence_v2, aes(y=allNative, x=zone, fill=building)) + 
-  geom_boxplot(width=0.5, alpha=0.9, fill=colorInvasion) + # , position=position_nudge(0.5)
-  geom_point(position=position_jitter(width = 0.25, height = 0, seed=3), shape=shapeBuilding, size=2.5, stroke=1.5, aes(color=zone)) +
+  geom_boxplot(width=0.5, alpha=0.9, fill=colorInvasion, show.legend = FALSE) + 
+  geom_point(position=position_jitter(width = 0.25, height = 0, seed=3), shape=shapeBuilding, size=2.5, stroke=1.5, aes(color=zone), show.legend = FALSE) +
   geom_text(position=position_jitter(width = 0.25, height = 0,seed=3), aes(label=building), size=2.5) +
   scale_color_manual(values = colorInvasion) +
   ylim(c(0,10)) +
-  scale_y_continuous( breaks=c(0,8,16,24,32,40), labels= round(c(0,8,16,24,32,40)/40*100), limits=c(0,44)) +
+  scale_y_continuous( breaks=c(0,8,16,24,32,40), labels= round(c(0,8,16,24,32,40)/40*100), limits=c(0,42)) +
   theme_classic()
 p_abundance
+
+
+
+
+
+figure2 <- function(){
+  grid.arrange(p_richness, p_abundance, p_diversity, nrow = 1)
+}
+
+pdf(file = "figure2_v1.pdf", width=15, height = 5)
+figure2()
+dev.off()
+
+
+
+
 
 
 # native + tapinoma magnum ants abundance (proportion of baits occupied)
@@ -451,4 +469,99 @@ summary(tetsp_test)
 
 
 
+# Species recruitment at baits
+head(dataTI3)
+dim(dataTI3)
+
+# new dataset to add some info
+dataTI3_2 <- dataTI3
+for (i in 17:31) {
+  for (j in 1: dim(dataTI3_2)[1]){
+    if (dataTI3_2[j,i] > 0) {dataTI3_2[j,i] <- 1}
+  }
+}
+head(dataTI3_2)
+dataTI3_2$Ab_allNatives[dataTI3_2$Ab_allNatives>0] <- 1
+dataTI3_2$Ab_baits_allspecies <- as.numeric(as.character(dataTI3_2$Ab_allNatives)) + dataTI3_2$tap_mag
+dataTI3_2$Ab_baits_allspecies <- as.numeric(as.character(dataTI3_2$Ab_baits_allspecies))
+range(dataTI3_2$Ab_baits_allspecies)
+dataTI3_2$Ab_baits_allspecies[dataTI3_2$Ab_baits_allspecies>0] <- 1
+
+# creates dataset for plotting the barplot
+ALLSpecies_occBaits <- aggregate(as.numeric(as.character(dataTI3_2$Ab_baits_allspecies)), by=list(dataTI3_2$building), mean)
+colnames(ALLSpecies_occBaits) <- c("building", "meanOccBaits")
+ALLSpecies_occBaits$zone <- c(rep("Invaded", 8), rep("Non-Invaded", 8))
+w = wilcox.test(ALLSpecies_occBaits$meanOccBaits ~ ALLSpecies_occBaits$zone)
+w2 <- c(round(as.numeric(w$statistic, digits=0)), round(w$p.value, digits=4))
+mean_species_occBaits <- aggregate(ALLSpecies_occBaits$meanOccBaits, by=list(ALLSpecies_occBaits$zone), mean)
+colnames(mean_species_occBaits) <- c("zone", "meanOccBaits")
+mean_species_occBaits$median <- aggregate(ALLSpecies_occBaits$meanOccBaits, by=list(ALLSpecies_occBaits$zone), median)[,2]
+mean_species_occBaits$se <- aggregate(ALLSpecies_occBaits$meanOccBaits, by=list(ALLSpecies_occBaits$zone), sd)[,2]/sqrt(8)
+mean_species_occBaits$species <- "All species"
+mean_species_occBaits$statsWilcox <- w2
+Stats_occBaits <- mean_species_occBaits
+
+NativeSpecies_occBaits <- aggregate(as.numeric(as.character(dataTI3_2$Ab_allNatives)), by=list(dataTI3_2$building), mean)
+colnames(NativeSpecies_occBaits) <- c("building", "meanOccBaits")
+NativeSpecies_occBaits$zone <- c(rep("Invaded", 8), rep("Non-Invaded", 8))
+w = wilcox.test(NativeSpecies_occBaits$meanOccBaits ~ NativeSpecies_occBaits$zone)
+w2 <- c(round(as.numeric(w$statistic, digits=0)), round(w$p.value, digits=4))
+mean_species_occBaits <- aggregate(NativeSpecies_occBaits$meanOccBaits, by=list(NativeSpecies_occBaits$zone), mean)
+colnames(mean_species_occBaits) <- c("zone", "meanOccBaits")
+mean_species_occBaits$median <- aggregate(NativeSpecies_occBaits$meanOccBaits, by=list(NativeSpecies_occBaits$zone), median)[,2]
+mean_species_occBaits$se <- aggregate(NativeSpecies_occBaits$meanOccBaits, by=list(NativeSpecies_occBaits$zone), sd)[,2]/sqrt(8)
+mean_species_occBaits$species <- "Native only"
+mean_species_occBaits$statsWilcox <- w2
+Stats_occBaits <- rbind(Stats_occBaits, mean_species_occBaits)
+
+
+for (i in 17:31){
+  species_occBaits <- aggregate(dataTI3_2[,i], by=list(dataTI3_2$building), mean)
+  colnames(species_occBaits) <- c("building", "meanOccBaits")
+  species_occBaits$zone <- c(rep("Invaded", 8), rep("Non-Invaded", 8))
+  w = wilcox.test(species_occBaits$meanOccBaits ~ species_occBaits$zone)
+  w2 <- c(round(as.numeric(w$statistic, digits=0)), round(w$p.value, digits=4))
+  
+  mean_species_occBaits <- aggregate(species_occBaits$meanOccBaits, by=list(species_occBaits$zone), mean)
+  colnames(mean_species_occBaits) <- c("zone", "meanOccBaits")
+  mean_species_occBaits$median <- aggregate(species_occBaits$meanOccBaits, by=list(species_occBaits$zone), median)[,2]
+  mean_species_occBaits$se <- aggregate(species_occBaits$meanOccBaits, by=list(species_occBaits$zone), sd)[,2]/sqrt(8)
+  mean_species_occBaits$species <- colnames(dataTI3_2)[i]
+  mean_species_occBaits$statsWilcox <- w2
+  
+  Stats_occBaits <- rbind(Stats_occBaits, mean_species_occBaits)
+}
+
+order_NI <- Stats_occBaits[Stats_occBaits$zone=="Non-Invaded",]
+order_species_NI <- as.character(order_NI$species[order(order_NI$meanOccBaits, decreasing=T) ])
+
+# plot
+Stats_occBaits$zone <- ordered(Stats_occBaits$zone, levels = c("Non-Invaded","Invaded"))
+Stats_occBaits$species <- ordered(Stats_occBaits$specie, levels = order_species_NI)
+
+
+figure3 <- ggplot(data=Stats_occBaits[-c(1:4),], aes(x=species, y=meanOccBaits, fill=zone)) +
+  geom_bar(stat = "identity", position="dodge",lwd=0.65, col="black", width=0.75) +
+  geom_errorbar( aes(x=species, ymin=(meanOccBaits-se), ymax=(meanOccBaits+se)), 
+                 position=position_dodge(0.75),
+                 width=0.25, colour="black", alpha=0.9, size=0.5) +
+  geom_point(aes(x=species, y=median, fill=zone),
+             position=position_dodge(0.75),
+             color= "red", size=1.25) +
+  labs(y="Proportion of baits occupied",
+       x="Species") +
+  scale_fill_manual(values=colorInvasion) + 
+  scale_y_continuous(trans = 'pseudo_log') +
+  theme(legend.position = "none", 
+        axis.title.y = element_text(size = 16),
+        axis.title.x = element_text(size = 16),
+        plot.margin = unit(c(0.25, 0.25, 0.25, 0.25), "cm"),
+        axis.text.x = element_text(size=12, angle=45, hjust=1, vjust=1.15),
+        axis.text.y = element_text(size=14))
+
+pdf(file = "figure3_v1.pdf", width=10, height = 7.5)
+figure3
+dev.off()
+
+#
 
