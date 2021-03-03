@@ -332,8 +332,7 @@ shapeBuilding <- c(rep(c(0:7), each=3), rep(c(0:7), each=3))
 richness_test <- glmmTMB(richness ~ 1 +
                            zone + 
                            (1|building) + 
-                           (1|Date) + 
-                           (1|age_building), 
+                           (1|Date), 
                          data=dataTI3presence_v2, 
                          family=poisson)
 summary(richness_test)
@@ -355,8 +354,7 @@ p_richness
 diversity_test <- glmmTMB(diversity ~ 1 +
                            zone + 
                            (1|building) + 
-                           (1|Date) + 
-                           (1|age_building), 
+                           (1|Date), 
                          data=dataTI3presence_v2, 
                          family=gaussian)
 summary(diversity_test)
@@ -375,8 +373,7 @@ p_diversity
 allNative_test <- glmmTMB(cbind(allNative, nbBaits) ~ 1 +
                             zone + 
                             (1|building/age_building) + 
-                            (1|Date) + 
-                            (1|age_building), 
+                            (1|Date), 
                           data=dataTI3presence_v2, 
                           family=binomial)
 summary(allNative_test)
@@ -386,8 +383,8 @@ p_abundance <- ggplot(dataTI3presence_v2, aes(y=allNative, x=zone, fill=building
   geom_point(position=position_jitter(width = 0.25, height = 0, seed=3), shape=shapeBuilding, size=2.5, stroke=1.5, aes(color=zone), show.legend = FALSE) +
   geom_text(position=position_jitter(width = 0.25, height = 0,seed=3), aes(label=building), size=2.5) +
   scale_color_manual(values = colorInvasion) +
-  ylim(c(0,10)) +
-  scale_y_continuous( breaks=c(0,8,16,24,32,40), labels= round(c(0,8,16,24,32,40)/40*100), limits=c(0,42)) +
+  ylim(c(0,42)) +
+  scale_y_continuous( breaks=c(0,8,16,24,32,40), labels= round(c(0,8,16,24,32,40)/40*100)) +
   theme_classic()
 p_abundance
 
@@ -412,8 +409,7 @@ dev.off()
 allANTS_test <- glmmTMB(cbind(allANTS, nbBaits) ~ 1 +
                           zone + 
                           (1|building) + 
-                          (1|Date) + 
-                          (1|age_building), 
+                          (1|Date), 
                         data=dataTI3presence_v2, 
                         family=binomial)
 summary(allANTS_test)
@@ -423,8 +419,7 @@ summary(allANTS_test)
 lasnig_test <- glmmTMB(cbind(las_nig, nbBaits) ~ 1 +
                          zone + 
                          (1|building) + 
-                         (1|Date) + 
-                         (1|age_building), 
+                         (1|Date), 
                        data=dataTI3presence_v2, 
                        family=binomial)
 summary(lasnig_test)
@@ -433,8 +428,7 @@ summary(lasnig_test)
 myrspe_test <- glmmTMB(cbind(myr_spe, nbBaits) ~ 1 +
                          zone + 
                          (1|building) + 
-                         (1|Date) + 
-                         (1|age_building), 
+                         (1|Date), 
                        data=dataTI3presence_v2, 
                        family=binomial)
 summary(myrspe_test)
@@ -443,8 +437,7 @@ summary(myrspe_test)
 myrsab_test <- glmmTMB(cbind(myr_sab, nbBaits) ~ 1 +
                          zone + 
                          (1|building) + 
-                         (1|Date) + 
-                         (1|age_building), 
+                         (1|Date), 
                        data=dataTI3presence_v2, 
                        family=binomial)
 summary(myrsab_test)
@@ -453,8 +446,7 @@ summary(myrsab_test)
 tetsp_test <- glmmTMB(cbind(tet_sp, nbBaits) ~ 1 +
                         zone + 
                         (1|building) + 
-                        (1|Date) + 
-                        (1|age_building), 
+                        (1|Date), 
                       data=dataTI3presence_v2, 
                       family=binomial)
 summary(tetsp_test)
@@ -463,7 +455,6 @@ summary(tetsp_test)
 
 
 # Plotting native species species recruitment at baits
-
 
 # new dataset to add some info
 dataTI3_2 <- dataTI3
@@ -586,19 +577,20 @@ system.time(sr_binomial_lasnig <- simulateResiduals(binomial_lasnig, n=1000))
 testDispersion(simulationOutput = sr_binomial_lasnig, alternative ="two.sided")
 plot(sr_binomial_lasnig) # very good...
 
-ef_binomial_lasnig_all <- ggpredict(binomial_lasnig, c("time", "Bface", "zone"), type = "fe")
-plot(ef_binomial_lasnig_all, line.size=1.25, col=colorCardinals) 
+ef_binomial_lasnig_all <- ggemmeans(binomial_lasnig, c("time", "Bface", "zone"), type = "fe")
+plot(ef_binomial_lasnig_all, col=colorCardinals, line.size=1.75, dot.size=4, dodge=0.4) 
 performance::r2(binomial_lasnig)
 
-ef_binomial_lasnig_side <- ggpredict(binomial_lasnig, c("Bface", "zone"), type = "fe")
-plot(ef_binomial_lasnig_side, line.size=1.25, col=colorInvasion ) + ylim(0.15, 0.62)
+ef_binomial_lasnig_side <- ggemmeans(binomial_lasnig, c("Bface", "zone"), type = "fe")
+plot(ef_binomial_lasnig_side, col=colorInvasion, line.size=2, dot.size=5, dodge=0.25)
 
-marginal_lasnig_side <- emmeans(binomial_lasnig, specs =  pairwise ~ zone | Bface, type = "response", adjust="tukey") 
-cld(marginal_lasnig_side$emmeans,
+marginal_binomial_lasnig_side <- emmeans(binomial_lasnig, specs =  pairwise ~ zone | Bface, type = "response", adjust="tukey") 
+cld(marginal_binomial_lasnig_side$emmeans,
     alpha=0.05,
     Letters=letters)
 
-
+marginal_binomial_lasnig_zone <- emmeans(binomial_lasnig, specs =  pairwise ~ zone, type = "response", adjust="tukey") 
+marginal_binomial_lasnig_zone
 
 # Myrmica specioides
 binomial_myrspe <- glmmTMB(myr_spe ~ 1 +
@@ -619,6 +611,16 @@ system.time(sr_binomial_myrspe <- simulateResiduals(binomial_myrspe, n=1000))
 testDispersion(simulationOutput = sr_binomial_myrspe, alternative ="two.sided")
 plot(sr_binomial_myrspe) # very good...
 
+ef_binomial_myrspe_side <- ggemmeans(binomial_myrspe, c("time", "zone"), type = "fe")
+plot(ef_binomial_myrspe_side, col=colorInvasion, line.size=2, dot.size=5, dodge=0.25)# + ylim(0.15, 0.62)
+
+marginal_binomial_myrspe_time <- emmeans(binomial_myrspe, specs =  pairwise ~ zone | time, type = "response", adjust="tukey") 
+cld(marginal_binomial_myrspe_time$emmeans,
+    alpha=0.05,
+    Letters=letters)
+
+marginal_binomial_myrspe_zone <- emmeans(binomial_myrspe, specs =  pairwise ~ zone, type = "response", adjust="tukey") 
+marginal_binomial_myrspe_zone
 
 # Myrmica sabuleti
 binomial_myrsab <- glmmTMB(myr_sab ~ 1 +
@@ -639,6 +641,11 @@ system.time(sr_binomial_myrsab <- simulateResiduals(binomial_myrsab, n=1000))
 testDispersion(simulationOutput = sr_binomial_myrsab, alternative ="two.sided")
 plot(sr_binomial_myrsab) # very good...
 
+ef_binomial_myrsab_all <- ggemmeans(binomial_myrsab, c("time", "Bface", "zone"), type = "fe")
+plot(ef_binomial_myrsab_all, col=colorCardinals, line.size=2, dot.size=5, dodge=0.25)# + ylim(0.15, 0.62)
+
+marginal_binomial_myrsab_zone <- emmeans(binomial_myrsab, specs =  pairwise ~ zone, type = "response", adjust="tukey") 
+marginal_binomial_myrsab_zone
 
 # Tetramorium sp.
 binomial_tetsp <- glmmTMB(tet_sp ~ 1 +
@@ -659,21 +666,54 @@ system.time(sr_binomial_tetsp <- simulateResiduals(binomial_tetsp, n=1000))
 testDispersion(simulationOutput = sr_binomial_tetsp, alternative ="two.sided")
 plot(sr_binomial_tetsp) # very good...
 
+ef_binomial_tetsp_side <- ggemmeans(binomial_tetsp, c("Bface"), type = "fe")
+plot(ef_binomial_tetsp_side, line.size=2, col=colorInvasion, dot.size=5, dodge=0.25)# + ylim(0.15, 0.62)
+
+marginal_binomial_tetsp_side <- emmeans(binomial_tetsp, specs =  pairwise ~ Bface, type = "response", adjust="tukey") 
+cld(marginal_binomial_tetsp_side$emmeans,
+    alpha=0.05,
+    Letters=letters)
+
+
+# Tapinoma magnum
+binomial_tapmag <- glmmTMB(tap_mag ~ 1 +
+                             Bface +
+                             #time +
+                             #time:Bface +
+                             (1|building) +
+                             (1|Date), 
+                           data=dataTI3presence[dataTI3presence$zone=="invaded",], 
+                           family=binomial)
+Anova(binomial_tapmag, type="III")
+summary(binomial_tapmag)
+
+system.time(sr_binomial_tapmag <- simulateResiduals(binomial_tapmag, n=1000))
+testDispersion(simulationOutput = sr_binomial_tapmag, alternative ="two.sided")
+plot(sr_binomial_tapmag) # very good...
+
+ef_binomial_tapmag_side <- ggemmeans(binomial_tapmag, c("Bface"), type = "fe")
+plot(ef_binomial_tapmag_side, col=colorCardinals, line.size=2, dot.size=5, dodge=0.25)
+
+marginal_binomial_tapmag_side <- emmeans(binomial_tapmag, specs =  pairwise ~ Bface, type = "response", adjust="tukey") 
+cld(marginal_binomial_tapmag_side$emmeans,
+    alpha=0.05,
+    Letters=letters)
+
 
 
 
 ## Number of workers recruited at baits
 
-# Lasius niger
+# Lasius niger >> DONE
 poisson_lasnig <- glmmTMB(las_nig ~ 1 + 
                        zone +
                        time + 
                        Bface +
                        zone:time +
                        zone:Bface +
-                       time:Bface +
+                       #time:Bface +
                        (1|building)  + 
-                         (1|Date),
+                       (1|Date),
                      
                      ziformula= ~ 1 +
                        zone +
@@ -690,22 +730,186 @@ poisson_lasnig <- glmmTMB(las_nig ~ 1 +
 
 Anova(poisson_lasnig, type="III")
 summary(poisson_lasnig)
+performance::r2_zeroinflated(poisson_lasnig, method="correlation")
 
 system.time(sr_poisson_lasnig <- simulateResiduals(poisson_lasnig, n=1000))
 testDispersion(simulationOutput = sr_poisson_lasnig, alternative ="two.sided")
 plot(sr_poisson_lasnig) # very good...
 
-ef_binomial_lasnig_all <- ggpredict(binomial_lasnig, c("time", "Bface", "zone"), type = "fe")
-plot(ef_binomial_lasnig_all, line.size=1.25, col=colorCardinals) 
-performance::r2(binomial_lasnig)
 
-ef_binomial_lasnig_side <- ggpredict(binomial_lasnig, c("Bface", "zone"), type = "fe")
-plot(ef_binomial_lasnig_side, line.size=1.25, col=colorInvasion ) + ylim(0.15, 0.62)
+# all effects in Lasius niger
+ef_poisson_lasnig_all <- ggemmeans(poisson_lasnig, c("time", "Bface", "zone"), type = "fe")
+plot(ef_poisson_lasnig_all, line.size=1.25, col=colorCardinals) 
 
-marginal_lasnig_side <- emmeans(binomial_lasnig, specs =  pairwise ~ zone | Bface, type = "response", adjust="tukey") 
-cld(marginal_lasnig_side$emmeans,
+
+# interaction between building side and invasion in Lasius niger
+ef_poisson_lasnig_side <- ggemmeans(poisson_lasnig, c("Bface", "zone"), type = "fe", ci.lvl = 0.95)
+plot(ef_poisson_lasnig_side, line.size=2, col=colorInvasion, dot.size=5, dodge=0.25 )# + ylim(0.15, 0.62)
+
+marginal_poisson_lasnig_side <- emmeans(poisson_lasnig, specs =  pairwise ~ zone | Bface, type = "response", adjust="tukey") 
+cld(marginal_poisson_lasnig_side$emmeans,
+    alpha=0.05,
+    Letters=letters)
+
+# interaction between time and invasion in Lasius niger
+ef_poisson_lasnig_time <- ggemmeans(poisson_lasnig, c("time", "zone"), type = "fe")
+plot(ef_poisson_lasnig_time, line.size=2, col=colorInvasion, dot.size=5, dodge=0.25)# + ylim(0.15, 0.62)
+
+marginal_poisson_lasnig_time <- emmeans(poisson_lasnig, specs =  pairwise ~ zone | time, type = "response", adjust="tukey") 
+cld(marginal_poisson_lasnig_time$emmeans,
     alpha=0.05,
     Letters=letters)
 
 
+
+# Myrmica specioides >> DONE
+poisson_myrspe <- glmmTMB(myr_spe ~ 1 + 
+                            #zone +
+                            #time + 
+                            Bface +
+                            #zone:time +
+                            #zone:Bface +
+                            #time:Bface +
+                            (1|building)  + 
+                            (1|Date),
+                          
+                          ziformula= ~ 1 +
+                            zone +
+                            time +
+                            #Bface +
+                            #zone:time +
+                            #zone:Bface +
+                            #time:Bface +
+                            (1|building) + 
+                            (1|Date),
+                          
+                          family= truncated_nbinom1, 
+                          data=dataTI3)
+
+Anova(poisson_myrspe, type="III")
+summary(poisson_myrspe)
+performance::r2_zeroinflated(poisson_myrspe, method="correlation")
+
+system.time(sr_poisson_myrspe <- simulateResiduals(poisson_myrspe, n=1000))
+testDispersion(simulationOutput = sr_poisson_myrspe, alternative ="two.sided")
+plot(sr_poisson_myrspe) # very good...
+
+ef_poisson_myrspe_side <- ggemmeans(poisson_myrspe, c("Bface"), type = "fe")
+plot(ef_poisson_myrspe_side, line.size=2, col=colorCardinals, dot.size=5, dodge=0.25)# + ylim(0.15, 0.62)
+
+marginal_poisson_myrspe_side <- emmeans(poisson_myrspe, specs =  pairwise ~ Bface, type = "response", adjust="tukey") 
+cld(marginal_poisson_myrspe_side$emmeans,
+    alpha=0.05,
+    Letters=letters)
+
+
+# Myrmica sabuleti >> DONE
+poisson_myrsab <- glmmTMB(myr_sab ~ 1 + 
+                            #zone +
+                            #time + 
+                            #Bface +
+                            #zone:time +
+                            #zone:Bface +
+                            #time:Bface +
+                            (1|building)  + 
+                            (1|Date),
+                          
+                          ziformula= ~ 1 +
+                            zone +
+                            time +
+                            Bface +
+                            #zone:time +
+                            #zone:Bface +
+                            #time:Bface +
+                            (1|building) + 
+                            (1|Date),
+                          
+                          family=truncated_nbinom1, 
+                          data=dataTI3)
+
+Anova(poisson_myrsab, type="III")
+summary(poisson_myrsab)
+performance::r2_zeroinflated(poisson_myrsab, method="correlation")
+
+system.time(sr_poisson_myrspe <- simulateResiduals(poisson_myrspe, n=1000))
+testDispersion(simulationOutput = sr_poisson_myrspe, alternative ="two.sided")
+plot(sr_poisson_myrspe) # very good...
+
+
+# Tetramorium sp. >> DONE
+poisson_tetsp <- glmmTMB(tet_sp ~ 1 + 
+                            #zone +
+                            time + 
+                            #Bface +
+                            #zone:time +
+                            #zone:Bface +
+                            #time:Bface +
+                            (1|building)  + 
+                            (1|Date),
+                          
+                          ziformula= ~ 1 +
+                            #zone +
+                            #time +
+                            Bface +
+                            #zone:time +
+                            #zone:Bface +
+                            #time:Bface +
+                            (1|building) + 
+                            (1|Date),
+                          
+                          family=truncated_nbinom1, 
+                          data=dataTI3)
+
+Anova(poisson_tetsp, type="III")
+summary(poisson_tetsp)
+performance::r2_zeroinflated(poisson_tetsp, method="correlation")
+
+system.time(sr_poisson_tetsp <- simulateResiduals(poisson_tetsp, n=1000))
+testDispersion(simulationOutput = sr_poisson_tetsp, alternative ="two.sided")
+plot(sr_poisson_tetsp) # very good...
+
+ef_poisson_tetsp_time <- ggemmeans(poisson_tetsp, c("time"), type = "fe")
+plot(ef_poisson_tetsp_time, line.size=2, dot.size=5, dodge=0.25)# + ylim(0.15, 0.62)
+
+marginal_poisson_tetsp_time <- emmeans(poisson_tetsp, specs =  pairwise ~ time, type = "response", adjust="tukey") 
+cld(marginal_poisson_tetsp_time$emmeans,
+    alpha=0.05,
+    Letters=letters)
+
+
+
+# Tapinoma magnum
+poisson_tapmag <- glmmTMB(tap_mag ~ 1 + 
+                           time + 
+                           #Bface +
+                           #time:Bface +
+                           (1|building)  + 
+                           (1|Date),
+                         
+                         ziformula= ~ 1 +
+                           #time +
+                           Bface +
+                           #time:Bface +
+                           (1|building) + 
+                           (1|Date),
+                         
+                         family=truncated_nbinom1,
+                         data=dataTI3[dataTI3$zone=="invaded" & dataTI3$tap_mag <= max(sort(dataTI3$tap_mag[dataTI3$zone=="invaded"])[-c((960*0.95):960)]),])
+
+Anova(poisson_tapmag, type="III")
+summary(poisson_tapmag)
+performance::r2_zeroinflated(poisson_tapmag, method="correlation")
+
+system.time(sr_poisson_tapmag <- simulateResiduals(poisson_tapmag, n=1000))
+testDispersion(simulationOutput = sr_poisson_tapmag, alternative ="two.sided")
+plot(sr_poisson_tapmag) # very good...
+
+ef_poisson_tapmag_time <- ggemmeans(poisson_tapmag, c("time"), type = "fe")
+plot(ef_poisson_tapmag_time, line.size=2, dot.size=5, dodge=0.25)
+
+
+marginal_poisson_tapmag_time <- emmeans(poisson_tapmag, specs =  pairwise ~ time , type = "response", adjust="tukey") 
+cld(marginal_poisson_tapmag_time$emmeans,
+    alpha=0.05,
+    Letters=letters)
 
