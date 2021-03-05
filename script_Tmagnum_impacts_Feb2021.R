@@ -572,6 +572,7 @@ binomial_lasnig <- glmmTMB(las_nig ~ 1 +
                         family=binomial)
 Anova(binomial_lasnig, type="III")
 summary(binomial_lasnig)
+r2_tjur(binomial_lasnig)
 
 system.time(sr_binomial_lasnig <- simulateResiduals(binomial_lasnig, n=1000))
 testDispersion(simulationOutput = sr_binomial_lasnig, alternative ="two.sided")
@@ -579,7 +580,6 @@ plot(sr_binomial_lasnig) # very good...
 
 ef_binomial_lasnig_all <- ggemmeans(binomial_lasnig, c("time", "Bface", "zone"), type = "fe")
 plot(ef_binomial_lasnig_all, col=colorCardinals, line.size=1.75, dot.size=4, dodge=0.4) 
-performance::r2(binomial_lasnig)
 
 ef_binomial_lasnig_side <- ggemmeans(binomial_lasnig, c("Bface", "zone"), type = "fe")
 plot(ef_binomial_lasnig_side, col=colorInvasion, line.size=2, dot.size=5, dodge=0.25)
@@ -591,6 +591,18 @@ cld(marginal_binomial_lasnig_side$emmeans,
 
 marginal_binomial_lasnig_zone <- emmeans(binomial_lasnig, specs =  pairwise ~ zone, type = "response", adjust="tukey") 
 marginal_binomial_lasnig_zone
+
+binomial_lasnig_nre <- glmmTMB(las_nig ~ 1 +
+                             zone + 
+                             Bface +
+                             time +
+                             zone:Bface +
+                             #zone:time +
+                             time:Bface, 
+                           data=dataTI3presence, 
+                           family=binomial)
+r2_tjur(binomial_lasnig_nre)
+
 
 # Myrmica specioides
 binomial_myrspe <- glmmTMB(myr_spe ~ 1 +
@@ -606,6 +618,7 @@ binomial_myrspe <- glmmTMB(myr_spe ~ 1 +
                            family=binomial)
 Anova(binomial_myrspe, type="III")
 summary(binomial_myrspe)
+r2_tjur(binomial_myrspe)
 
 system.time(sr_binomial_myrspe <- simulateResiduals(binomial_myrspe, n=1000))
 testDispersion(simulationOutput = sr_binomial_myrspe, alternative ="two.sided")
@@ -622,6 +635,18 @@ cld(marginal_binomial_myrspe_time$emmeans,
 marginal_binomial_myrspe_zone <- emmeans(binomial_myrspe, specs =  pairwise ~ zone, type = "response", adjust="tukey") 
 marginal_binomial_myrspe_zone
 
+binomial_myrspe_nre <- glmmTMB(myr_spe ~ 1 +
+                                 zone + 
+                                 #Bface +
+                                 time 
+                               #zone:Bface +
+                               #zone:time +
+                               #time:Bface +
+                               , 
+                               data=dataTI3presence, 
+                               family=binomial)
+r2_tjur(binomial_myrspe_nre)
+
 # Myrmica sabuleti
 binomial_myrsab <- glmmTMB(myr_sab ~ 1 +
                              zone + 
@@ -636,6 +661,7 @@ binomial_myrsab <- glmmTMB(myr_sab ~ 1 +
                            family=binomial)
 Anova(binomial_myrsab, type="III")
 summary(binomial_myrsab)
+r2_tjur(binomial_myrsab)
 
 system.time(sr_binomial_myrsab <- simulateResiduals(binomial_myrsab, n=1000))
 testDispersion(simulationOutput = sr_binomial_myrsab, alternative ="two.sided")
@@ -646,6 +672,18 @@ plot(ef_binomial_myrsab_all, col=colorCardinals, line.size=2, dot.size=5, dodge=
 
 marginal_binomial_myrsab_zone <- emmeans(binomial_myrsab, specs =  pairwise ~ zone, type = "response", adjust="tukey") 
 marginal_binomial_myrsab_zone
+
+binomial_myrsab_nre <- glmmTMB(myr_sab ~ 1 +
+                             zone + 
+                             Bface +
+                             time 
+                             #zone:Bface +
+                             #zone:time +
+                             #time:Bface +
+                               , 
+                           data=dataTI3presence, 
+                           family=binomial)
+r2_tjur(binomial_myrsab_nre)
 
 # Tetramorium sp.
 binomial_tetsp <- glmmTMB(tet_sp ~ 1 +
@@ -661,6 +699,7 @@ binomial_tetsp <- glmmTMB(tet_sp ~ 1 +
                            family=binomial)
 Anova(binomial_tetsp, type="III")
 summary(binomial_tetsp)
+r2_tjur(binomial_tetsp)
 
 system.time(sr_binomial_tetsp <- simulateResiduals(binomial_tetsp, n=1000))
 testDispersion(simulationOutput = sr_binomial_tetsp, alternative ="two.sided")
@@ -675,6 +714,18 @@ cld(marginal_binomial_tetsp_side$emmeans,
     Letters=letters)
 
 
+binomial_tetsp_nre <- glmmTMB(tet_sp ~ 1 +
+                            #zone + 
+                            Bface 
+                            #time +
+                            #zone:Bface +
+                            #zone:time +
+                            #time:Bface +
+                            , 
+                          data=dataTI3presence, 
+                          family=binomial)
+r2_tjur(binomial_tetsp_nre)
+
 # Tapinoma magnum
 binomial_tapmag <- glmmTMB(tap_mag ~ 1 +
                              Bface +
@@ -686,6 +737,7 @@ binomial_tapmag <- glmmTMB(tap_mag ~ 1 +
                            family=binomial)
 Anova(binomial_tapmag, type="III")
 summary(binomial_tapmag)
+r2_tjur(binomial_tapmag)
 
 system.time(sr_binomial_tapmag <- simulateResiduals(binomial_tapmag, n=1000))
 testDispersion(simulationOutput = sr_binomial_tapmag, alternative ="two.sided")
@@ -699,6 +751,14 @@ cld(marginal_binomial_tapmag_side$emmeans,
     alpha=0.05,
     Letters=letters)
 
+binomial_tapmag_nre <- glmmTMB(tap_mag ~ 1 +
+                             Bface 
+                             #time +
+                             #time:Bface +
+                            , 
+                           data=dataTI3presence[dataTI3presence$zone=="invaded",], 
+                           family=binomial)
+r2_tjur(binomial_tapmag_nre)
 
 
 
