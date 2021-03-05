@@ -760,7 +760,27 @@ cld(marginal_poisson_lasnig_time$emmeans,
     alpha=0.05,
     Letters=letters)
 
+plot(log(predict(poisson_lasnig, type="response")), log(dataTI3$las_nig))
 
+poisson_lasnig_nre <- glmmTMB(las_nig ~ 1 +
+                                zone +
+                                time + 
+                                Bface +
+                                zone:time +
+                                zone:Bface ,
+                                #time:Bface +
+                              
+                              ziformula= ~ 1 +
+                                zone +
+                                time +
+                                Bface +
+                                #zone:time +
+                                zone:Bface +
+                                time:Bface,
+                              family=truncated_nbinom1,
+                              data=dataTI3)
+
+performance::r2_zeroinflated(poisson_lasnig_nre, method="correlation")
 
 # Myrmica specioides >> DONE
 poisson_myrspe <- glmmTMB(myr_spe ~ 1 + 
@@ -802,6 +822,28 @@ cld(marginal_poisson_myrspe_side$emmeans,
     alpha=0.05,
     Letters=letters)
 
+plot(log(predict(poisson_myrspe, type="response")), log(dataTI3$myr_spe))
+
+poisson_myrspe_nre <- glmmTMB(myr_spe ~ 1 +
+                              #zone +
+                              #time ,
+                              Bface ,
+                              #zone:time +
+                              #zone:Bface +
+                              #time:Bface +
+                              
+                              ziformula= ~ 1 +
+                                zone +
+                                time ,
+                                #Bface +
+                              #zone:time +
+                              #zone:Bface +
+                              #time:Bface +
+                              family=truncated_nbinom1,
+                              data=dataTI3)
+
+performance::r2_zeroinflated(poisson_myrspe_nre, method="correlation")
+
 
 # Myrmica sabuleti >> DONE
 poisson_myrsab <- glmmTMB(myr_sab ~ 1 + 
@@ -831,10 +873,31 @@ Anova(poisson_myrsab, type="III")
 summary(poisson_myrsab)
 performance::r2_zeroinflated(poisson_myrsab, method="correlation")
 
-system.time(sr_poisson_myrspe <- simulateResiduals(poisson_myrspe, n=1000))
-testDispersion(simulationOutput = sr_poisson_myrspe, alternative ="two.sided")
-plot(sr_poisson_myrspe) # very good...
+system.time(sr_poisson_myrsab <- simulateResiduals(poisson_myrsab, n=1000))
+testDispersion(simulationOutput = sr_poisson_myrsab, alternative ="two.sided")
+plot(sr_poisson_myrsab) # very good...
 
+plot(log(predict(poisson_myrsab, type="response")), log(dataTI3$myr_sab))
+
+poisson_myrsab_nre <- glmmTMB(myr_sab ~ 1 ,
+                               #zone +
+                               #time ,
+                             #Bface +
+                             #zone:time +
+                             #zone:Bface +
+                             #time:Bface +
+                             
+                             ziformula= ~ 1 +
+                               zone +
+                               time +
+                               Bface,
+                             #zone:time +
+                             #zone:Bface +
+                             #time:Bface +
+                             family=truncated_nbinom1,
+                             data=dataTI3)
+
+performance::r2_zeroinflated(poisson_myrsab_nre, method="correlation")
 
 # Tetramorium sp. >> DONE
 poisson_tetsp <- glmmTMB(tet_sp ~ 1 + 
@@ -876,6 +939,28 @@ cld(marginal_poisson_tetsp_time$emmeans,
     alpha=0.05,
     Letters=letters)
 
+plot(log(predict(poisson_tetsp, type="response")), log(dataTI3$tet_sp))
+
+poisson_tetsp_nre <- glmmTMB(tet_sp ~ 1 +
+                               #zone +
+                                time ,
+                              #Bface +
+                             #zone:time +
+                             #zone:Bface +
+                             #time:Bface +
+                              
+                              ziformula= ~ 1 +
+                               #zone +
+                                #time +
+                                Bface,
+                             #zone:time +
+                             #zone:Bface +
+                             #time:Bface +
+                              family=truncated_nbinom1,
+                              data=dataTI3)
+
+performance::r2_zeroinflated(poisson_tetsp_nre, method="correlation")
+
 
 
 # Tapinoma magnum
@@ -912,4 +997,22 @@ marginal_poisson_tapmag_time <- emmeans(poisson_tapmag, specs =  pairwise ~ time
 cld(marginal_poisson_tapmag_time$emmeans,
     alpha=0.05,
     Letters=letters)
+
+poisson_tapmag_nre <- glmmTMB(tap_mag ~ 1 + 
+                            time ,
+                            #Bface +
+                            #time:Bface
+                          
+                          ziformula= ~ 1 +
+                            #time +
+                            Bface,
+                            #time:Bface
+                          family=truncated_nbinom1,
+                          data=dataTI3[dataTI3$zone=="invaded" & dataTI3$tap_mag <= max(sort(dataTI3$tap_mag[dataTI3$zone=="invaded"])[-c((960*0.95):960)]),])
+
+performance::r2_zeroinflated(poisson_tapmag_nre, method="correlation")
+
+plot(log(predict(poisson_tapmag, type="response")), log(dataTI3$tap_mag[dataTI3$zone=="invaded" & dataTI3$tap_mag <= max(sort(dataTI3$tap_mag[dataTI3$zone=="invaded"])[-c((960*0.95):960)])]))
+
+
 
