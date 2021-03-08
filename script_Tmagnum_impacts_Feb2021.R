@@ -819,8 +819,11 @@ plot(ef_poisson_lasnig_all, line.size=1.25, col=colorCardinals)
 ef_poisson_lasnig_side <- ggemmeans(poisson_lasnig, c("Bface", "zone"), type = "fe", ci.lvl = 0.95)
 plot(ef_poisson_lasnig_side, line.size=2, col=colorInvasion, dot.size=5, dodge=0.25 )# + ylim(0.15, 0.62)
 
-marginal_poisson_lasnig_side <- emmeans(poisson_lasnig, specs =  pairwise ~ zone | Bface, type = "response", adjust="tukey") 
-cld(marginal_poisson_lasnig_side$emmeans,
+ef_poisson_lasnig_time <- ggemmeans(poisson_lasnig, c("time", "zone"), type = "fe", ci.lvl = 0.95)
+plot(ef_poisson_lasnig_time, line.size=2, col=colorInvasion, dot.size=5, dodge=0.25 )# + ylim(0.15, 0.62)
+
+marginal_poisson_lasnig_zone <- emmeans(poisson_lasnig, specs =  pairwise ~ zone, type = "response", adjust="tukey") 
+cld(marginal_poisson_lasnig_zone$emmeans,
     alpha=0.05,
     Letters=letters)
 
