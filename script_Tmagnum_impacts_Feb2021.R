@@ -415,7 +415,7 @@ dev.off()
 
 
 
-
+plot(las_nig ~tap_mag, data=dataTI3presence_v2)
 
 
 # native + tapinoma magnum ants abundance (proportion of baits occupied)
@@ -596,6 +596,10 @@ plot(ef_binomial_lasnig_all, col=colorCardinals, line.size=1.75, dot.size=4, dod
 
 ef_binomial_lasnig_side <- ggemmeans(binomial_lasnig, c("Bface", "zone"), type = "fe")
 plot(ef_binomial_lasnig_side, col=colorInvasion, line.size=2, dot.size=5, dodge=0.25)
+
+pdf(file = "figure4a_v1.pdf", width=10, height = 7)
+plot(ef_binomial_lasnig_side, col=colorInvasion, line.size=2, dot.size=5, dodge=0.25)
+dev.off()
 
 marginal_binomial_lasnig_side <- emmeans(binomial_lasnig, specs =  pairwise ~ zone | Bface, type = "response", adjust="tukey") 
 cld(marginal_binomial_lasnig_side$emmeans,
@@ -819,17 +823,22 @@ plot(ef_poisson_lasnig_all, line.size=1.25, col=colorCardinals)
 ef_poisson_lasnig_side <- ggemmeans(poisson_lasnig, c("Bface", "zone"), type = "fe", ci.lvl = 0.95)
 plot(ef_poisson_lasnig_side, line.size=2, col=colorInvasion, dot.size=5, dodge=0.25 )# + ylim(0.15, 0.62)
 
-ef_poisson_lasnig_time <- ggemmeans(poisson_lasnig, c("time", "zone"), type = "fe", ci.lvl = 0.95)
-plot(ef_poisson_lasnig_time, line.size=2, col=colorInvasion, dot.size=5, dodge=0.25 )# + ylim(0.15, 0.62)
+pdf(file = "figure4b_v1.pdf", width=10, height = 7)
+plot(ef_poisson_lasnig_side, line.size=2, col=colorInvasion, dot.size=5, dodge=0.25 )# + ylim(0.15, 0.62)
+dev.off()
 
-marginal_poisson_lasnig_zone <- emmeans(poisson_lasnig, specs =  pairwise ~ zone, type = "response", adjust="tukey") 
-cld(marginal_poisson_lasnig_zone$emmeans,
+marginal_poisson_lasnig_side <- emmeans(poisson_lasnig, specs =  pairwise ~ zone | Bface, type = "response", adjust="tukey") 
+cld(marginal_poisson_lasnig_side$emmeans,
     alpha=0.05,
     Letters=letters)
 
 # interaction between time and invasion in Lasius niger
 ef_poisson_lasnig_time <- ggemmeans(poisson_lasnig, c("time", "zone"), type = "fe")
 plot(ef_poisson_lasnig_time, line.size=2, col=colorInvasion, dot.size=5, dodge=0.25)# + ylim(0.15, 0.62)
+
+pdf(file = "figure4c_v1.pdf", width=10, height = 7)
+plot(ef_poisson_lasnig_time, line.size=2, col=colorInvasion, dot.size=5, dodge=0.25)
+dev.off()
 
 marginal_poisson_lasnig_time <- emmeans(poisson_lasnig, specs =  pairwise ~ zone | time, type = "response", adjust="tukey") 
 cld(marginal_poisson_lasnig_time$emmeans,
