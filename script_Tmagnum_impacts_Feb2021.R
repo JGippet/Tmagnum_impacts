@@ -821,10 +821,10 @@ plot(ef_poisson_lasnig_all, line.size=1.25, col=colorCardinals)
 
 # interaction between building side and invasion in Lasius niger
 ef_poisson_lasnig_side <- ggemmeans(poisson_lasnig, c("Bface", "zone"), type = "fe", ci.lvl = 0.95)
-plot(ef_poisson_lasnig_side, line.size=2, col=colorInvasion, dot.size=5, dodge=0.25 )# + ylim(0.15, 0.62)
+plot(ef_poisson_lasnig_side, line.size=2, col=colorInvasion, dot.size=5, dodge=0.25 )
 
 pdf(file = "figure4b_v1.pdf", width=10, height = 7)
-plot(ef_poisson_lasnig_side, line.size=2, col=colorInvasion, dot.size=5, dodge=0.25 )# + ylim(0.15, 0.62)
+plot(ef_poisson_lasnig_side, line.size=2, col=colorInvasion, dot.size=5, dodge=0.25 )  + ylim(10,47)
 dev.off()
 
 marginal_poisson_lasnig_side <- emmeans(poisson_lasnig, specs =  pairwise ~ zone | Bface, type = "response", adjust="tukey") 
@@ -834,10 +834,10 @@ cld(marginal_poisson_lasnig_side$emmeans,
 
 # interaction between time and invasion in Lasius niger
 ef_poisson_lasnig_time <- ggemmeans(poisson_lasnig, c("time", "zone"), type = "fe")
-plot(ef_poisson_lasnig_time, line.size=2, col=colorInvasion, dot.size=5, dodge=0.25)# + ylim(0.15, 0.62)
+plot(ef_poisson_lasnig_time, line.size=2, col=colorInvasion, dot.size=5, dodge=0.25)
 
 pdf(file = "figure4c_v1.pdf", width=10, height = 7)
-plot(ef_poisson_lasnig_time, line.size=2, col=colorInvasion, dot.size=5, dodge=0.25)
+plot(ef_poisson_lasnig_time, line.size=2, col=colorInvasion, dot.size=5, dodge=0.25) + ylim(10,47)
 dev.off()
 
 marginal_poisson_lasnig_time <- emmeans(poisson_lasnig, specs =  pairwise ~ zone | time, type = "response", adjust="tukey") 
