@@ -5,7 +5,7 @@
 Jérôme M. W. Gippet<sup>1*ǂ</sup>, Lorena George<sup>1ǂ</sup>, Cleo Bertelsmeier<sup>1*</sup>
 
 ###
-<span font-size:4em;">
+<span style="font-size:4em;">
 <sup>1</sup> Department of Ecology and evolution, University of Lausanne, 1015 Lausanne, Switzerland
 
 <sup>*</sup> Correspondence to: jerome.gippet@unil.ch or cleo.bertelsmeier@unil.ch
