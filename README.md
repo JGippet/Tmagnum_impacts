@@ -24,9 +24,5 @@ C. Bertelsmeier: 0000-0003-3624-1300
 Biological invasions, conservation, Formicidae, impacts, shading conditions, *Tapinoma magnum*
 
 
-**Authors contributions**
-
-J.M.W.G. and C.B. designed the study. L.G. carried out field sampling. L.G. and J.M.W.G. identified the ants. J.M.W.G. and L.G. carried out data processing and statistical analyses. All authors wrote the manuscript.
-
 
 
