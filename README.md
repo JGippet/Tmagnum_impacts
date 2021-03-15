@@ -1,7 +1,7 @@
 # **Repository for data storage and analysis**
 
 ## The local coexistence of native and invasive ant competitors is associated with shades-mediated micro-spatial shifts in native species’ foraging activity
-Jérôme M. W. Gippet1*ǂ, Lorena George1ǂ, Cleo Bertelsmeier1*
+Jérôme M. W. Gippet<sup>1*ǂ</sup>, Lorena George1ǂ, Cleo Bertelsmeier1*
 
 1Department of Ecology and evolution, University of Lausanne, 1015 Lausanne, Switzerland
 *Correspondence to: jerome.gippet@unil.ch or cleo.bertelsmeier@unil.ch
