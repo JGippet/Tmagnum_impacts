@@ -591,7 +591,7 @@ system.time(sr_binomial_lasnig <- simulateResiduals(binomial_lasnig, n=1000))
 testDispersion(simulationOutput = sr_binomial_lasnig, alternative ="two.sided")
 plot(sr_binomial_lasnig) # very good...
 
-ef_binomial_lasnig_all <- ggemmeans(binomial_lasnig, c("time", "Bface", "zone"), type = "fe")
+ef_binomial_lasnig_all <- ggemmeans(binomial_lasnig, c("time", "Bface"), type = "fe")
 plot(ef_binomial_lasnig_all, col=colorCardinals, line.size=1.75, dot.size=4, dodge=0.4) 
 
 ef_binomial_lasnig_side <- ggemmeans(binomial_lasnig, c("Bface", "zone"), type = "fe")
