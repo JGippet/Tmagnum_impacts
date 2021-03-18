@@ -162,7 +162,7 @@ plot(Tground_mean ~ Light_mean_sqrt, data=dataTI3_Temperature[dataTI3_Temperatur
 Tmean_test <- glmmTMB(Tground_mean   ~ 1 +
                         Bface + 
                         time + 
-                        #zone + 
+                        zone + 
                         time:Bface + 
                         #zone:time +
                         #zone:Bface +
@@ -170,6 +170,7 @@ Tmean_test <- glmmTMB(Tground_mean   ~ 1 +
                       data=dataTI3_Temperature, 
                       family=gaussian)
 Anova(Tmean_test, type="III")
+drop1(Tmean_test, test="Chisq")
 # Analysis of Deviance Table (Type III Wald chisquare tests)
 # 
 # Response: Tground_mean
@@ -571,6 +572,7 @@ dev.off()
 head(dataTI3presence)
 dim(dataTI3presence)
 
+
 # Lasius niger
 binomial_lasnig <- glmmTMB(las_nig ~ 1 +
                           zone + 
@@ -591,7 +593,7 @@ system.time(sr_binomial_lasnig <- simulateResiduals(binomial_lasnig, n=1000))
 testDispersion(simulationOutput = sr_binomial_lasnig, alternative ="two.sided")
 plot(sr_binomial_lasnig) # very good...
 
-ef_binomial_lasnig_all <- ggemmeans(binomial_lasnig, c("time", "Bface"), type = "fe")
+ef_binomial_lasnig_all <- ggemmeans(binomial_lasnig, c("time", "Bface", "zone"), type = "fe")
 plot(ef_binomial_lasnig_all, col=colorCardinals, line.size=1.75, dot.size=4, dodge=0.4) 
 
 ef_binomial_lasnig_side <- ggemmeans(binomial_lasnig, c("Bface", "zone"), type = "fe")
