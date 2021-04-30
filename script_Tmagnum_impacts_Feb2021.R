@@ -11,23 +11,8 @@ library(vioplot)
 library(vegan)
 library(gridExtra)
 library(buildmer)
-
-
-library(see) # if using performance::check_model
-
-
-library(lme4)
-library(effects)
-
-library(sjstats)
-library(bbmle) #for AICtab
-library(cowplot)
-library(RColorBrewer)
-library(ggpubr)
-
-library(lmerTest)
-
-
+library(performance)
+library(scales)
 
 
                                 ######### [PART 1] #########
@@ -869,6 +854,14 @@ poisson_lasnig_nre <- glmmTMB(las_nig ~ 1 +
 
 performance::r2_zeroinflated(poisson_lasnig_nre, method="correlation")
 
+
+
+
+
+
+
+
+
 # Myrmica specioides >> DONE
 poisson_myrspe <- glmmTMB(myr_spe ~ 1 + 
                             #zone +
@@ -1101,5 +1094,92 @@ performance::r2_zeroinflated(poisson_tapmag_nre, method="correlation")
 
 plot(log(predict(poisson_tapmag, type="response")), log(dataTI3$tap_mag[dataTI3$zone=="invaded" & dataTI3$tap_mag <= max(sort(dataTI3$tap_mag[dataTI3$zone=="invaded"])[-c((960*0.95):960)])]))
 
+
+
+
+
+
+
+
+
+
+
+# another representation
+
+ef_poisson_lasnig_side_time <- ggpredict(poisson_lasnig, c("Bface", "time", "zone"), type = "fe.zi", ci.lvl = 0.95)
+plot(ef_poisson_lasnig_side_time, line.size=2, col=colorInvasion, dot.size=5, dodge=0.25 )
+ef_poisson_lasnig_side_time_2 <- data.frame(ef_poisson_lasnig_side_time)
+ef_poisson_lasnig_side_time_2$predicted_rescaled <- rescale(ef_poisson_lasnig_side_time_2$predicted, to=c(2,16), from=c(2,22))
+
+
+plot(1, xlim=c(0.5,3.5), ylim=c(0.5,4.5), type="n",
+     xaxt='n', yaxt='n')
+axis(1, c(1,2,3), c("morning", "noon", "afternoon"))
+axis(2, c(1,2,3,4), c("N", "E", "S", "W"))
+# non-invaded
+points(1,1, cex=(ef_poisson_lasnig_side_time_2$predicted_rescaled[ef_poisson_lasnig_side_time_2$group=="morning" & ef_poisson_lasnig_side_time_2$x=="N" & ef_poisson_lasnig_side_time_2$facet=="free"]), col=alpha(colorInvasion[1],0.5), pch=16)
+points(1,2, cex=(ef_poisson_lasnig_side_time_2$predicted_rescaled[ef_poisson_lasnig_side_time_2$group=="morning" & ef_poisson_lasnig_side_time_2$x=="E" & ef_poisson_lasnig_side_time_2$facet=="free"]), col=alpha(colorInvasion[1],0.5), pch=16)
+points(1,3, cex=(ef_poisson_lasnig_side_time_2$predicted_rescaled[ef_poisson_lasnig_side_time_2$group=="morning" & ef_poisson_lasnig_side_time_2$x=="S" & ef_poisson_lasnig_side_time_2$facet=="free"]), col=alpha(colorInvasion[1],0.5), pch=16)
+points(1,4, cex=(ef_poisson_lasnig_side_time_2$predicted_rescaled[ef_poisson_lasnig_side_time_2$group=="morning" & ef_poisson_lasnig_side_time_2$x=="W" & ef_poisson_lasnig_side_time_2$facet=="free"]), col=alpha(colorInvasion[1],0.5), pch=16)
+
+points(2,1, cex=(ef_poisson_lasnig_side_time_2$predicted_rescaled[ef_poisson_lasnig_side_time_2$group=="noon" & ef_poisson_lasnig_side_time_2$x=="N" & ef_poisson_lasnig_side_time_2$facet=="free"]), col=alpha(colorInvasion[1],0.5), pch=16)
+points(2,2, cex=(ef_poisson_lasnig_side_time_2$predicted_rescaled[ef_poisson_lasnig_side_time_2$group=="noon" & ef_poisson_lasnig_side_time_2$x=="E" & ef_poisson_lasnig_side_time_2$facet=="free"]), col=alpha(colorInvasion[1],0.5), pch=16)
+points(2,3, cex=(ef_poisson_lasnig_side_time_2$predicted_rescaled[ef_poisson_lasnig_side_time_2$group=="noon" & ef_poisson_lasnig_side_time_2$x=="S" & ef_poisson_lasnig_side_time_2$facet=="free"]), col=alpha(colorInvasion[1],0.5), pch=16)
+points(2,4, cex=(ef_poisson_lasnig_side_time_2$predicted_rescaled[ef_poisson_lasnig_side_time_2$group=="noon" & ef_poisson_lasnig_side_time_2$x=="W" & ef_poisson_lasnig_side_time_2$facet=="free"]), col=alpha(colorInvasion[1],0.5), pch=16)
+
+points(3,1, cex=(ef_poisson_lasnig_side_time_2$predicted_rescaled[ef_poisson_lasnig_side_time_2$group=="afternoon" & ef_poisson_lasnig_side_time_2$x=="N" & ef_poisson_lasnig_side_time_2$facet=="free"]), col=alpha(colorInvasion[1],0.5), pch=16)
+points(3,2, cex=(ef_poisson_lasnig_side_time_2$predicted_rescaled[ef_poisson_lasnig_side_time_2$group=="afternoon" & ef_poisson_lasnig_side_time_2$x=="E" & ef_poisson_lasnig_side_time_2$facet=="free"]), col=alpha(colorInvasion[1],0.5), pch=16)
+points(3,3, cex=(ef_poisson_lasnig_side_time_2$predicted_rescaled[ef_poisson_lasnig_side_time_2$group=="afternoon" & ef_poisson_lasnig_side_time_2$x=="S" & ef_poisson_lasnig_side_time_2$facet=="free"]), col=alpha(colorInvasion[1],0.5), pch=16)
+points(3,4, cex=(ef_poisson_lasnig_side_time_2$predicted_rescaled[ef_poisson_lasnig_side_time_2$group=="afternoon" & ef_poisson_lasnig_side_time_2$x=="W" & ef_poisson_lasnig_side_time_2$facet=="free"]), col=alpha(colorInvasion[1],0.5), pch=16)
+
+#invaded
+points(1,1, cex=(ef_poisson_lasnig_side_time_2$predicted_rescaled[ef_poisson_lasnig_side_time_2$group=="morning" & ef_poisson_lasnig_side_time_2$x=="N" & ef_poisson_lasnig_side_time_2$facet=="invaded"]), col=alpha(colorInvasion[2],0.5), pch=16)
+points(1,2, cex=(ef_poisson_lasnig_side_time_2$predicted_rescaled[ef_poisson_lasnig_side_time_2$group=="morning" & ef_poisson_lasnig_side_time_2$x=="E" & ef_poisson_lasnig_side_time_2$facet=="invaded"]), col=alpha(colorInvasion[2],0.5), pch=16)
+points(1,3, cex=(ef_poisson_lasnig_side_time_2$predicted_rescaled[ef_poisson_lasnig_side_time_2$group=="morning" & ef_poisson_lasnig_side_time_2$x=="S" & ef_poisson_lasnig_side_time_2$facet=="invaded"]), col=alpha(colorInvasion[2],0.5), pch=16)
+points(1,4, cex=(ef_poisson_lasnig_side_time_2$predicted_rescaled[ef_poisson_lasnig_side_time_2$group=="morning" & ef_poisson_lasnig_side_time_2$x=="W" & ef_poisson_lasnig_side_time_2$facet=="invaded"]), col=alpha(colorInvasion[2],0.5), pch=16)
+
+points(2,1, cex=(ef_poisson_lasnig_side_time_2$predicted_rescaled[ef_poisson_lasnig_side_time_2$group=="noon" & ef_poisson_lasnig_side_time_2$x=="N" & ef_poisson_lasnig_side_time_2$facet=="invaded"]), col=alpha(colorInvasion[2],0.5), pch=16)
+points(2,2, cex=(ef_poisson_lasnig_side_time_2$predicted_rescaled[ef_poisson_lasnig_side_time_2$group=="noon" & ef_poisson_lasnig_side_time_2$x=="E" & ef_poisson_lasnig_side_time_2$facet=="invaded"]), col=alpha(colorInvasion[2],0.5), pch=16)
+points(2,3, cex=(ef_poisson_lasnig_side_time_2$predicted_rescaled[ef_poisson_lasnig_side_time_2$group=="noon" & ef_poisson_lasnig_side_time_2$x=="S" & ef_poisson_lasnig_side_time_2$facet=="invaded"]), col=alpha(colorInvasion[2],0.5), pch=16)
+points(2,4, cex=(ef_poisson_lasnig_side_time_2$predicted_rescaled[ef_poisson_lasnig_side_time_2$group=="noon" & ef_poisson_lasnig_side_time_2$x=="W" & ef_poisson_lasnig_side_time_2$facet=="invaded"]), col=alpha(colorInvasion[2],0.5), pch=16)
+
+points(3,1, cex=(ef_poisson_lasnig_side_time_2$predicted_rescaled[ef_poisson_lasnig_side_time_2$group=="afternoon" & ef_poisson_lasnig_side_time_2$x=="N" & ef_poisson_lasnig_side_time_2$facet=="invaded"]), col=alpha(colorInvasion[2],0.5), pch=16)
+points(3,2, cex=(ef_poisson_lasnig_side_time_2$predicted_rescaled[ef_poisson_lasnig_side_time_2$group=="afternoon" & ef_poisson_lasnig_side_time_2$x=="E" & ef_poisson_lasnig_side_time_2$facet=="invaded"]), col=alpha(colorInvasion[2],0.5), pch=16)
+points(3,3, cex=(ef_poisson_lasnig_side_time_2$predicted_rescaled[ef_poisson_lasnig_side_time_2$group=="afternoon" & ef_poisson_lasnig_side_time_2$x=="S" & ef_poisson_lasnig_side_time_2$facet=="invaded"]), col=alpha(colorInvasion[2],0.5), pch=16)
+points(3,4, cex=(ef_poisson_lasnig_side_time_2$predicted_rescaled[ef_poisson_lasnig_side_time_2$group=="afternoon" & ef_poisson_lasnig_side_time_2$x=="W" & ef_poisson_lasnig_side_time_2$facet=="invaded"]), col=alpha(colorInvasion[2],0.5), pch=16)
+
+
+
+
+
+
+
+
+ef_poisson_tapmag_side_time <- ggpredict(poisson_tapmag, c("Bface", "time"), type = "zi.prob", ci.lvl = 0.95)
+# plot(ef_poisson_tapmag_side_time, line.size=2, col=colorInvasion, dot.size=5, dodge=0.25 )
+ef_poisson_tapmag_side_time_2 <- data.frame(ef_poisson_tapmag_side_time)
+ef_poisson_tapmag_side_time_2$predicted_rescaled <- rescale(ef_poisson_tapmag_side_time_2$predicted, to=c(2,16), from=c(2,22))
+
+
+# plot(1, xlim=c(0.5,3.5), ylim=c(0.5,4.5), type="n",
+#      xaxt='n', yaxt='n')
+# axis(1, c(1,2,3), c("morning", "noon", "afternoon"))
+# axis(2, c(1,2,3,4), c("N", "E", "S", "W"))
+
+#invaded
+points(1,1, cex=(ef_poisson_tapmag_side_time_2$predicted_rescaled[ef_poisson_tapmag_side_time_2$group=="morning" & ef_poisson_tapmag_side_time_2$x=="N"]), col=colorInvasion[2], pch=21)
+points(1,2, cex=(ef_poisson_tapmag_side_time_2$predicted_rescaled[ef_poisson_tapmag_side_time_2$group=="morning" & ef_poisson_tapmag_side_time_2$x=="E"]), col=colorInvasion[2], pch=21)
+points(1,3, cex=(ef_poisson_tapmag_side_time_2$predicted_rescaled[ef_poisson_tapmag_side_time_2$group=="morning" & ef_poisson_tapmag_side_time_2$x=="S"]), col=colorInvasion[2], pch=21)
+points(1,4, cex=(ef_poisson_tapmag_side_time_2$predicted_rescaled[ef_poisson_tapmag_side_time_2$group=="morning" & ef_poisson_tapmag_side_time_2$x=="W"]), col=colorInvasion[2], pch=21)
+
+points(2,1, cex=(ef_poisson_tapmag_side_time_2$predicted_rescaled[ef_poisson_tapmag_side_time_2$group=="noon" & ef_poisson_tapmag_side_time_2$x=="N"]), col=colorInvasion[2], pch=21)
+points(2,2, cex=(ef_poisson_tapmag_side_time_2$predicted_rescaled[ef_poisson_tapmag_side_time_2$group=="noon" & ef_poisson_tapmag_side_time_2$x=="E"]), col=colorInvasion[2], pch=21)
+points(2,3, cex=(ef_poisson_tapmag_side_time_2$predicted_rescaled[ef_poisson_tapmag_side_time_2$group=="noon" & ef_poisson_tapmag_side_time_2$x=="S"]), col=colorInvasion[2], pch=21)
+points(2,4, cex=(ef_poisson_tapmag_side_time_2$predicted_rescaled[ef_poisson_tapmag_side_time_2$group=="noon" & ef_poisson_tapmag_side_time_2$x=="W"]), col=colorInvasion[2], pch=21)
+
+points(3,1, cex=(ef_poisson_tapmag_side_time_2$predicted_rescaled[ef_poisson_tapmag_side_time_2$group=="afternoon" & ef_poisson_tapmag_side_time_2$x=="N"]), col=colorInvasion[2], pch=21)
+points(3,2, cex=(ef_poisson_tapmag_side_time_2$predicted_rescaled[ef_poisson_tapmag_side_time_2$group=="afternoon" & ef_poisson_tapmag_side_time_2$x=="E"]), col=colorInvasion[2], pch=21)
+points(3,3, cex=(ef_poisson_tapmag_side_time_2$predicted_rescaled[ef_poisson_tapmag_side_time_2$group=="afternoon" & ef_poisson_tapmag_side_time_2$x=="S"]), col=colorInvasion[2], pch=21)
+points(3,4, cex=(ef_poisson_tapmag_side_time_2$predicted_rescaled[ef_poisson_tapmag_side_time_2$group=="afternoon" & ef_poisson_tapmag_side_time_2$x=="W"]), col=colorInvasion[2], pch=21)
 
 
